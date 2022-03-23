@@ -1,0 +1,433 @@
+openapi: 3.0.0
+info:
+  title: game-poll
+  description: a backend part game-poll
+  version: 1.0.0
+
+servers:
+  - url: /
+
+components:
+  schemas:
+    Question:
+      type: object
+      properties:
+        id:
+          type: number
+        category: 
+          type: string
+        question:
+          type: string
+        answers:
+          type: array
+        trueAnswer:
+          type: string
+        view:
+          type: string
+        tip:
+          type: string
+      Statistic:
+      type: object
+      properties:
+        score:
+          type: number
+        optional:
+          type: object
+          items:
+            type: any
+    Setting:
+      type: object
+      properties:
+        setting1:
+          type: number
+        optional:
+          type: object
+          items:
+            type: any
+    User:
+      type: object
+      properties:
+        fullname:
+          type: string
+        nickname:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    Auth:
+      type: object
+      properties:
+        message:
+          type: string
+        token:
+          type: string
+        refreshToken:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+    UnauthenticatedError:
+      description: Access token is missing, expired or invalid
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+
+paths:
+  /questions:
+    get:
+      tags:
+        - Questions
+      security:
+        []
+      summary: Get random Questions
+      description: Get random Questions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                id:
+                  type: number
+                  description: Number of question
+                category:
+                  type: string
+                  description: Category
+                question:
+                  type: string
+                  description: Question
+                answers:
+                  type: array
+                  description: Answer variants
+                trueAnswer:
+                  type: string
+                  description: Right answer
+                view:
+                  type: string
+                  description: Type of answers
+                tip:
+                  type: string
+                  description: Tip if wrong answer
+      responses:
+        200:
+          description: Successful request.
+          content:
+            application/json:
+              schema:
+                  $ref: "#/components/schemas/Question"
+        404:
+          description: Answer not found
+  /questions/all:
+    get:
+      tags:
+        - All Questions
+      security:
+        []
+      summary: Get all questions
+      description: Get all questions
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: "#/components/schemas/Question"
+  /questions/{id}:
+    parameters:
+      - quwestion: id
+        description: question Id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Question
+      security:
+        []
+      summary: Get question by Id
+      description: Get question by Id
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: "#/components/schemas/Question"
+        404:
+          description: Question not found
+  /users:
+    post:
+      tags:
+        - Users
+      security:
+        []
+      summary: Create a new user
+      description: Creates a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                username:
+                  type: string
+                  description: User name
+                email:
+                  type: string
+                  description: E-mail
+                password:
+                  type: string
+                  description: Password
+      responses:
+        200:
+          description: Successful creation.
+          content:
+            application/json:
+              schema:
+                  $ref: "#/components/schemas/User"
+        422:
+          description: Incorrect e-mail or password
+  /users/{id}:
+    parameters:
+      - username: id
+        description: userId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Users
+      summary: Get user
+      description: Gets user
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: "#/components/schemas/User"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          description: User not found
+    put:
+      tags:
+        - Users
+      summary: Update a user
+      description: Updates a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                email:
+                  type: string
+                  description: E-mail
+                password:
+                  type: string
+                  description: Password
+      responses:
+        200:
+          description: The user has been updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        400:
+          description: Bad request
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+    delete:
+      tags:
+        - Users
+      summary: Delete a user
+      description: Deletes a user by id
+      responses:
+        204:
+          description: The user has been deleted
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+  /users/{id}/tokens:
+    parameters:
+      - username: id
+        description: user id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Users
+      summary: Get new user tokens
+      description: Gets new user tokens
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Auth"
+        403:
+          $ref: '#/components/responses/UnauthenticatedError'
+  /users/{id}/statistics:
+    parameters:
+      - username: id
+        description: userId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Users/Statistic
+      summary: Get statistics
+      description: Gets statistics
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: "#/components/schemas/Statistic"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          description: Statistics not found
+    put:
+      tags:
+        - Users/Statistic
+      summary: Upsert statistics
+      description: Upserts new statistics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                score:
+                  type: number
+                  description: The number of the total scores
+                optional:
+                  type: object
+                  items:
+                    type: any
+      responses:
+        200:
+          description: The statistics has been created.
+          content:
+            application/json:
+              schema:
+                  $ref: "#/components/schemas/Statistic"
+        400:
+          description: Bad request
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+  /users/{id}/settings:
+    parameters:
+      - username: id
+        description: userId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Users/Setting
+      summary: Get settings
+      description: Gets settings
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: "#/components/schemas/Setting"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          description: Settings not found
+    put:
+      tags:
+        - Users/Setting
+      summary: Upsert settings
+      description: Upserts new settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                setting1:
+                  type: number
+                  description: some settings
+                optional:
+                  type: object
+                  items:
+                    type: any
+      responses:
+        200:
+          description: The settings has been created.
+          content:
+            application/json:
+              schema:
+                  $ref: "#/components/schemas/Setting"
+        400:
+          description: Bad request
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+  /signin:
+    post:
+      tags:
+        - Sign In
+      security:
+        []
+      summary: Sign in
+      description: Logins a user and returns a JWT-token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                email:
+                  type: string
+                  description: E-mail
+                password:
+                  type: string
+                  description: Password
+      responses:
+        200:
+          description: Successful login.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Auth"
+        403:
+          description: Incorrect e-mail or password
